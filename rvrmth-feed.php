@@ -70,7 +70,13 @@ class Rvrmth_Widget_Feed extends WP_Widget {
 	
 	private function feed_item_content($fn_args) 
 	{
-		$thumbnail_url = wp_get_attachment_image_src(get_post_thumbnail_id(), 'medium')[0];
+		if (function_exists('rvrmth_feed_args')) {
+			rvrmth_feed_args($fn_args);
+		}
+		if (!isset($fn_args['thumbnail_size'])) {
+			$fn_args['thumbnail_size'] = 'thumbnail';
+		}
+		$thumbnail_url = wp_get_attachment_image_src(get_post_thumbnail_id(), $fn_args['thumbnail_size'])[0];
 		$thumbnail_title = get_post(get_post_thumbnail_id())->post_title;
 		$title = $fn_args['show_post_title'] ? '<div class="title"><h1><a title="' . get_the_title() . '" rel="bookmark" href="' . get_the_permalink() . '">' . get_the_title() . '</a></h1></div>' : '';
 		

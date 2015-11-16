@@ -70,9 +70,6 @@ class Rvrmth_Widget_Feed extends WP_Widget {
 	
 	private function feed_item_content($fn_args) 
 	{
-		if (function_exists('rvrmth_feed_args')) {
-			rvrmth_feed_args($fn_args);
-		}
 		if (!isset($fn_args['thumbnail_size'])) {
 			$fn_args['thumbnail_size'] = 'thumbnail';
 		}
@@ -107,6 +104,11 @@ class Rvrmth_Widget_Feed extends WP_Widget {
 			$loop_query_params .= 'orderby=rand&';
 		}
 		$loop_query_params .= 'post_type=' . $post_type . '&cat=' . $category . '&posts_per_page=' . $max_results;
+		
+		if (function_exists('rvrmth_feed_args')) {
+			rvrmth_feed_args($fn_args);
+		}
+		
 		if ($type == 'tiles') {
 			echo '<div class="feed feed--' . $type . ' row row--' . $args['columns_per_row'] . '-col">';
 			do_loop(function(&$fn_args) {
@@ -128,7 +130,10 @@ class Rvrmth_Widget_Feed extends WP_Widget {
 	
 	public function fetch_items_ajax() 
 	{
+		$post_object = get_post($_POST['post_id']);
+		setup_postdata( $GLOBALS['post'] =& $post_object );
 		$this->fetch_items($_POST['args']);
+		wp_reset_postdata();
 		wp_die();
 	}
 
@@ -171,6 +176,7 @@ class Rvrmth_Widget_Feed extends WP_Widget {
 		$ajax_arguments = '';
 		if ($type == 'tiles') {
 			$ajax_arguments = 
+				'data-post-id=\'' . get_the_ID() . '\' ' . 
 				'data-args=\'' . json_encode($fn_args) . '\' ' . 
 				'data-ajax-enabled="' . ($shuffle_posts_every_ms > 0 ? 'enabled' : '') . '" ';
 		}

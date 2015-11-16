@@ -8,6 +8,7 @@ jQuery(document).ready(function($) {
 	function FeedInstace(wrapper) {
 		var ajaxEnabled = _isAjaxEnabled();
 		var args = JSON.parse(wrapper.getAttribute("data-args"));
+		var postId = JSON.parse(wrapper.getAttribute("data-post-id"));
 		var feed = wrapper.querySelector(".feed");
 		
 		function _isAjaxEnabled() {
@@ -18,7 +19,8 @@ jQuery(document).ready(function($) {
 		function shufflePosts() {
 			jQuery.post(ajax_object.ajax_url, {
 				"action": ajax_object.fetch_items_fn_name,
-				"args": args
+				"args": args,
+				"post_id": postId
 			}, function(response) {
 				var newFeedElement = $(response);
 				newFeedElement.addClass("inserting");

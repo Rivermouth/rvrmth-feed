@@ -15,29 +15,29 @@ Text Domain: rvrmth-feed
 include_once 'wp_dropdown_post_types.php';
 
 class Rvrmth_Widget_Feed extends WP_Widget {
-	
+
 	private static $text_domain = 'rvrmth-feed';
-	
+
 	private static $types = array(
 		'tiles' => 'Tiles',
 		'feed' => 'Feed'
 	);
 
-	function __construct() 
+	function __construct()
 	{
 		parent::__construct(
 			// Base ID of your widget
-			'rvrmth_widget_feed', 
+			'rvrmth_widget_feed',
 			// Widget name will appear in UI
-			__('Feed widget', self::$text_domain), 
+			__('Feed widget', self::$text_domain),
 			// Widget description
 			array('description' => __( 'Widget for creating post feeds.', self::$text_domain ))
 		);
-		
+
 		$this->register_ajax_js();
 	}
-	
-	private static function get_default_instance() 
+
+	private static function get_default_instance()
 	{
 		return array(
 			'title' => __( 'Title', self::$text_domain ),
@@ -54,7 +54,7 @@ class Rvrmth_Widget_Feed extends WP_Widget {
 			'shuffle_posts_every_ms' => 0,
 		);
 	}
-	
+
 	public function register_ajax_js()
 	{
 		$fetch_items_fn_name = 'fetch_items_ajax';
@@ -63,12 +63,12 @@ class Rvrmth_Widget_Feed extends WP_Widget {
 		add_action('wp_ajax_nopriv_fetch_items_ajax', $fetch_items_ajax_callback);
 		wp_enqueue_script('feed', plugins_url( '/rvrmth-feed.js', __FILE__ ), array('jquery'));
 		wp_localize_script('feed', 'ajax_object', array(
-			'ajax_url' => admin_url('admin-ajax.php'), 
+			'ajax_url' => admin_url('admin-ajax.php'),
 			'fetch_items_fn_name' => $fetch_items_fn_name
 		));
 	}
-	
-	private function feed_item_content($fn_args) 
+
+	private function feed_item_content($fn_args)
 	{
 		if (!isset($fn_args['thumbnail_size'])) {
 			$fn_args['thumbnail_size'] = 'thumbnail';
@@ -76,7 +76,7 @@ class Rvrmth_Widget_Feed extends WP_Widget {
 		$thumbnail_url = wp_get_attachment_image_src(get_post_thumbnail_id(), $fn_args['thumbnail_size'])[0];
 		$thumbnail_title = get_post(get_post_thumbnail_id())->post_title;
 		$title = $fn_args['show_post_title'] ? '<div class="title"><h1><a title="' . get_the_title() . '" rel="bookmark" href="' . get_the_permalink() . '">' . get_the_title() . '</a></h1></div>' : '';
-		
+
 		if (!$fn_args['title_after_image']) { echo $title; }
 		?>
 		<div class="thumbnail featured-image" style="background-image: url(<?php echo $thumbnail_url; ?>)">
@@ -85,13 +85,25 @@ class Rvrmth_Widget_Feed extends WP_Widget {
 				<meta itemprop="thumbnailURL" content="<?php echo $thumbnail_url; ?>" />
 			<?php endif; ?>
 		</div>
-		<?php 
+		<?php
 		if ($fn_args['title_after_image']) { echo $title; }
-		if ($fn_args['show_post_excerpt']) { 
+		if ($fn_args['show_post_excerpt']) {
 			echo '<div class="entry" itemprop="text">' . get_the_excerpt() . '</div>';
 		}
 	}
-	
+
+	public function echo_box($args) {
+		echo '<div class="box">';
+		$this->feed_item_content($args);
+		echo '</div>';
+	}
+
+	public function echo_feed_item($args) {
+		echo '<div class="feed--item"><article>';
+		$this->feed_item_content($args);
+		echo '</article></div>';
+	}
+
 	private function fetch_items($args=null)
 	{
 		$type = $args['type'];
@@ -104,31 +116,25 @@ class Rvrmth_Widget_Feed extends WP_Widget {
 			$loop_query_params .= 'orderby=rand&';
 		}
 		$loop_query_params .= 'post_type=' . $post_type . '&cat=' . $category . '&posts_per_page=' . $max_results;
-		
+
 		if (function_exists('rvrmth_feed_args')) {
 			rvrmth_feed_args($fn_args);
 		}
-		
+
 		if ($type == 'tiles') {
 			echo '<div class="feed feed--' . $type . ' row row--' . $args['columns_per_row'] . '-col">';
-			do_loop(function(&$fn_args) {
-				echo '<div class="box">';
-				$this->feed_item_content($fn_args);
-				echo '</div>';
-			}, $loop_query_params, false, $args);
+			$render_fn = function_exists('rvrmth_feed_echo_box') ? 'rvrmth_feed_echo_box' : array($this, 'echo_box');
+			do_loop($render_fn, $loop_query_params, false, $args);
 		}
 		else if ($type == 'feed') {
 			echo '<div class="feed feed--' . $type . '">';
-			do_loop(function(&$fn_args) {
-				echo '<div class="feed--item"><article>';
-				echo $this->feed_item_content($fn_args);
-				echo '</article></div>';
-			}, $loop_query_params, false, $args);
+			$render_fn = function_exists('rvrmth_feed_echo_feed_item') ? 'rvrmth_feed_echo_feed_item' : array($this, 'echo_feed_item');
+			do_loop($render_fn, $loop_query_params, false, $args);
 		}
 		echo '</div>';
 	}
-	
-	public function fetch_items_ajax() 
+
+	public function fetch_items_ajax()
 	{
 		$post_object = get_post($_POST['post_id']);
 		setup_postdata( $GLOBALS['post'] =& $post_object );
@@ -139,15 +145,15 @@ class Rvrmth_Widget_Feed extends WP_Widget {
 
 	// Creating widget front-end
 	// This is where the action happens
-	public function widget( $args, $instance ) 
+	public function widget( $args, $instance )
 	{
 		echo $args['before_widget'];
 		echo $args['before_title'] . apply_filters( 'widget_title', $instance['title'] ). $args['after_title'];
-		
+
 		if (!$instance) {
 			$instance = self::get_default_instance();
 		}
-		
+
 		$post_type = $instance['post_type'];
 		$category = $instance['category'];
 		$type = $instance['type'];
@@ -159,10 +165,10 @@ class Rvrmth_Widget_Feed extends WP_Widget {
 		$show_showall_button = $instance['show_showall_button'];
 		$showall_button_text = $instance['showall_button_text'];
 		$shuffle_posts_every_ms = $instance['shuffle_posts_every_ms'];
-		
+
 		$fn_args = array(
 			'show_post_title' => $show_post_title,
-			'show_post_excerpt' => $show_post_excerpt, 
+			'show_post_excerpt' => $show_post_excerpt,
 			'title_after_image' => $title_after_image,
 			'columns_per_row' => $columns_per_row,
 			'type' => $type,
@@ -171,23 +177,23 @@ class Rvrmth_Widget_Feed extends WP_Widget {
 			'max_results' => $max_results,
 			'shuffle_posts_every_ms' => $shuffle_posts_every_ms
 		);
-		
+
 		$element_id = 'rvrmth-feed-instance-' . $args['widget_id'];
 		$ajax_arguments = '';
 		if ($type == 'tiles') {
-			$ajax_arguments = 
-				'data-post-id=\'' . get_the_ID() . '\' ' . 
-				'data-args=\'' . json_encode($fn_args) . '\' ' . 
+			$ajax_arguments =
+				'data-post-id=\'' . get_the_ID() . '\' ' .
+				'data-args=\'' . json_encode($fn_args) . '\' ' .
 				'data-ajax-enabled="' . ($shuffle_posts_every_ms > 0 ? 'enabled' : '') . '" ';
 		}
-		
+
 		echo '<div id="' . $element_id . '" class="rvrmth-feed" ' . $ajax_arguments . '>';
 		$this->fetch_items($fn_args);
 		if ($show_showall_button) {
 			if ($category > 0) {
 				$button_text = get_cat_name($category);
 				$button_href = get_category_link($category);
-				
+
 			}
 			else {
 				$post_type_object = get_post_type_object($post_type);
@@ -197,12 +203,12 @@ class Rvrmth_Widget_Feed extends WP_Widget {
 			echo '<div><a href="' . $button_href . '" class="button button--block">' . $showall_button_text . '</a></div>';
 		}
 		echo '</div>';
-		
+
 		echo $args['after_widget'];
 	}
 
-	// Widget Backend 
-	public function form( $instance ) 
+	// Widget Backend
+	public function form( $instance )
 	{
 		if (!$instance) {
 			$instance = self::get_default_instance();
@@ -245,7 +251,7 @@ class Rvrmth_Widget_Feed extends WP_Widget {
 						<?php _e( 'Feed type:' ); ?>
 					</label>
 					<select id="<?php echo $this->get_field_id( 'type' ); ?>" name="<?php echo $this->get_field_name( 'type' ); ?>">
-						<?php 
+						<?php
 							foreach(self::$types as $key => $value) {
 								echo '<option value="' . $key . '" ' . ($type == $key ? 'selected=selected ' : '') . '>' . $value . '</option>';
 							}
@@ -305,11 +311,11 @@ class Rvrmth_Widget_Feed extends WP_Widget {
 					<input class="widefat" id="<?php echo $this->get_field_id( 'shuffle_posts_every_ms' ); ?>" name="<?php echo $this->get_field_name( 'shuffle_posts_every_ms' ); ?>" type="number" min="0" step="1000" value="<?php echo $shuffle_posts_every_ms; ?>" />
 				</div>
 			</p>
-		<?php 
+		<?php
 	}
 
 	// Updating widget replacing old instances with new
-	public function update( $new_instance, $old_instance ) 
+	public function update( $new_instance, $old_instance )
 	{
 		$instance = array();
 		$instance['title'] = ( ! empty( $new_instance['title'] ) ) ? strip_tags( $new_instance['title'] ) : '';
@@ -326,7 +332,7 @@ class Rvrmth_Widget_Feed extends WP_Widget {
 		$instance['shuffle_posts_every_ms'] = $new_instance['shuffle_posts_every_ms'];
 		return $instance;
 	}
-	
+
 }
 
 // Register and load the widget

@@ -120,14 +120,14 @@ class Rvrmth_Widget_Feed extends WP_Widget {
 		if (function_exists('rvrmth_feed_args')) {
 			rvrmth_feed_args($fn_args);
 		}
-
+		$wrapper_classess = "feed feed--$type feed--post-type-$post_type feed--cat-$category";
 		if ($type == 'tiles') {
-			echo '<div class="feed feed--' . $type . ' row row--' . $args['columns_per_row'] . '-col">';
+			echo '<div class="' . $wrapper_classess . ' row row--' . $args['columns_per_row'] . '-col">';
 			$render_fn = function_exists('rvrmth_feed_echo_box') ? 'rvrmth_feed_echo_box' : array($this, 'echo_box');
 			do_loop($render_fn, $loop_query_params, false, $args);
 		}
 		else if ($type == 'feed') {
-			echo '<div class="feed feed--' . $type . '">';
+			echo '<div class="' . $wrapper_classess . '">';
 			$render_fn = function_exists('rvrmth_feed_echo_feed_item') ? 'rvrmth_feed_echo_feed_item' : array($this, 'echo_feed_item');
 			do_loop($render_fn, $loop_query_params, false, $args);
 		}

@@ -70,9 +70,6 @@ class Rvrmth_Widget_Feed extends WP_Widget {
 
 	private function feed_item_content($fn_args)
 	{
-		if (!isset($fn_args['thumbnail_size'])) {
-			$fn_args['thumbnail_size'] = 'thumbnail';
-		}
 		$thumbnail_url = wp_get_attachment_image_src(get_post_thumbnail_id(), $fn_args['thumbnail_size'])[0];
 		$thumbnail_title = get_post(get_post_thumbnail_id())->post_title;
 		$title = $fn_args['show_post_title'] ? '<div class="title"><h1><a title="' . get_the_title() . '" rel="bookmark" href="' . get_the_permalink() . '">' . get_the_title() . '</a></h1></div>' : '';
@@ -118,18 +115,26 @@ class Rvrmth_Widget_Feed extends WP_Widget {
 		$loop_query_params .= 'post_type=' . $post_type . '&cat=' . $category . '&posts_per_page=' . $max_results;
 
 		if (function_exists('rvrmth_feed_args')) {
-			rvrmth_feed_args($fn_args);
+			rvrmth_feed_args($args);
 		}
+		if (!isset($args['thumbnail_size'])) {
+			$args['thumbnail_size'] = 'thumbnail';
+		}
+
 		$wrapper_classess = "feed feed--$type feed--post-type-$post_type feed--cat-$category";
 		if ($type == 'tiles') {
 			echo '<div class="' . $wrapper_classess . ' row row--' . $args['columns_per_row'] . '-col">';
-			$render_fn = function_exists('rvrmth_feed_echo_box') ? 'rvrmth_feed_echo_box' : array($this, 'echo_box');
-			do_loop($render_fn, $loop_query_params, false, $args);
+			do_loop(function(&$args) {
+				$render_fn = function_exists('rvrmth_feed_echo_box') ? 'rvrmth_feed_echo_box' : array($this, 'echo_box');
+				call_user_func($render_fn, $args);
+			}, $loop_query_params, false, $args);
 		}
 		else if ($type == 'feed') {
 			echo '<div class="' . $wrapper_classess . '">';
-			$render_fn = function_exists('rvrmth_feed_echo_feed_item') ? 'rvrmth_feed_echo_feed_item' : array($this, 'echo_feed_item');
-			do_loop($render_fn, $loop_query_params, false, $args);
+			do_loop(function(&$args) {
+				$render_fn = function_exists('rvrmth_feed_echo_feed_item') ? 'rvrmth_feed_echo_feed_item' : array($this, 'echo_feed_item');
+				call_user_func($render_fn, $args);
+			}, $loop_query_params, false, $args);
 		}
 		echo '</div>';
 	}

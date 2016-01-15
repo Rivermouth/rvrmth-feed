@@ -170,7 +170,7 @@ class Rvrmth_Widget_Feed extends WP_Widget {
 		$show_post_excerpt = $instance['show_post_excerpt'];
 		$title_after_image = $instance['title_after_image'];
 		$show_showall_button = $instance['show_showall_button'];
-		$showall_button_text = $instance['showall_button_text'];
+		$showall_button_text = empty($instance['showall_button_text']) ? '' : apply_filters('wpml_translate_single_string', $instance['showall_button_text'], 'Widgets', 'rvrmth-feed-showall_button_text - ' . $instance['showall_button_text']);
 		$shuffle_posts_every_ms = $instance['shuffle_posts_every_ms'];
 
 		$fn_args = array(
@@ -198,14 +198,15 @@ class Rvrmth_Widget_Feed extends WP_Widget {
 		$this->fetch_items($fn_args);
 		if ($show_showall_button) {
 			if ($category > 0) {
-				$button_text = get_cat_name($category);
 				$button_href = get_category_link($category);
-
 			}
 			else {
 				$post_type_object = get_post_type_object($post_type);
-				$button_text = $post_type_object->labels->name;
 				$button_href = get_post_type_archive_link($post_type_object->name);
+			}
+			if (empty($showall_button_text)) {
+				$post_type_object = get_post_type_object($post_type);
+				$showall_button_text = $post_type_object->labels->all_items;
 			}
 			echo '<div><a href="' . $button_href . '" class="button button--block">' . $showall_button_text . '</a></div>';
 		}
@@ -337,6 +338,11 @@ class Rvrmth_Widget_Feed extends WP_Widget {
 		$instance['show_showall_button'] = $new_instance['show_showall_button'];
 		$instance['showall_button_text'] = $new_instance['showall_button_text'];
 		$instance['shuffle_posts_every_ms'] = $new_instance['shuffle_posts_every_ms'];
+
+		if (!empty($showall_button_text)) {
+			do_action('wpml_register_single_string', 'Widgets', 'rvrmth-feed-showall_button_text - ' . $instance['showall_button_text'], $instance['showall_button_text']);
+		}
+
 		return $instance;
 	}
 

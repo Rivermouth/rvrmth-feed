@@ -101,8 +101,10 @@ class Rvrmth_Widget_Feed extends WP_Widget {
 		echo '</article></div>';
 	}
 
-	private function fetch_items($args=null)
+	private function fetch_items($args=array())
 	{
+		$do_we_have_posts = false;
+
 		$type = $args['type'];
 		$post_type = $args['post_type'];
 		$category = $args['category'];
@@ -125,6 +127,8 @@ class Rvrmth_Widget_Feed extends WP_Widget {
 		if ($type == 'tiles') {
 			echo '<div class="' . $wrapper_classess . ' row row--' . $args['columns_per_row'] . '-col">';
 			do_loop(function(&$args) {
+				$args['do_we_have_posts'] = true;
+
 				$render_fn = function_exists('rvrmth_feed_echo_box') ? 'rvrmth_feed_echo_box' : array($this, 'echo_box');
 				call_user_func($render_fn, $args);
 			}, $loop_query_params, false, $args);
@@ -132,11 +136,14 @@ class Rvrmth_Widget_Feed extends WP_Widget {
 		else if ($type == 'feed') {
 			echo '<div class="' . $wrapper_classess . '">';
 			do_loop(function(&$args) {
+				$args['do_we_have_posts'] = true;
+
 				$render_fn = function_exists('rvrmth_feed_echo_feed_item') ? 'rvrmth_feed_echo_feed_item' : array($this, 'echo_feed_item');
 				call_user_func($render_fn, $args);
 			}, $loop_query_params, false, $args);
 		}
 		echo '</div>';
+		return $args['do_we_have_posts'];
 	}
 
 	public function fetch_items_ajax()
@@ -152,11 +159,6 @@ class Rvrmth_Widget_Feed extends WP_Widget {
 	// This is where the action happens
 	public function widget( $args, $instance )
 	{
-		echo $args['before_widget'];
-		if (!empty($args['title'])) {
-			echo $args['before_title'] . apply_filters( 'widget_title', $instance['title'] ). $args['after_title'];
-		}
-
 		if (!$instance) {
 			$instance = self::get_default_instance();
 		}
@@ -185,6 +187,18 @@ class Rvrmth_Widget_Feed extends WP_Widget {
 			'shuffle_posts_every_ms' => $shuffle_posts_every_ms
 		);
 
+		ob_start();
+		$do_we_have_posts = $this->fetch_items($fn_args);
+		$fetch_items_output = ob_get_clean();
+		if (!$do_we_have_posts) {
+			return;
+		}
+
+		echo $args['before_widget'];
+		if (!empty($args['title'])) {
+			echo $args['before_title'] . apply_filters( 'widget_title', $instance['title'] ). $args['after_title'];
+		}
+
 		$element_id = 'rvrmth-feed-instance-' . $args['widget_id'];
 		$ajax_arguments = '';
 		if ($type == 'tiles') {
@@ -195,7 +209,7 @@ class Rvrmth_Widget_Feed extends WP_Widget {
 		}
 
 		echo '<div id="' . $element_id . '" class="rvrmth-feed" ' . $ajax_arguments . '>';
-		$this->fetch_items($fn_args);
+		echo $fetch_items_output;
 		if ($show_showall_button) {
 			if ($category > 0) {
 				$button_href = get_category_link($category);

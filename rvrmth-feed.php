@@ -123,6 +123,8 @@ class Rvrmth_Widget_Feed extends WP_Widget {
 			$args['thumbnail_size'] = 'thumbnail';
 		}
 
+		$args['do_we_have_posts'] = false;
+
 		$wrapper_classess = "feed feed--$type feed--post-type-$post_type feed--cat-$category";
 		if ($type == 'tiles') {
 			echo '<div class="' . $wrapper_classess . ' row row--' . $args['columns_per_row'] . '-col">';

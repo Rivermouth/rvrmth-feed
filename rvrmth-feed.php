@@ -3,7 +3,7 @@
 Plugin Name: Post feed
 Plugin URI:  http://URI_Of_Page_Describing_Plugin_and_Updates
 Description: Post feed widget. Show posts in various different layouts and with various options
-Version:     0.1
+Version:     0.3
 Author:      Rivermouth Ltd
 Author URI:  http://rivermouth.fi
 License:     GPL2

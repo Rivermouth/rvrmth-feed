@@ -43,7 +43,7 @@ class Rvrmth_Widget_Feed extends WP_Widget {
 			'title' => __( 'Title', self::$text_domain ),
 			'post_type' => 'post',
 			'category' => 0,
-			'type' => self::$types['Tiles'],
+			'type' => self::$types['tiles'],
 			'max_results' => 4,
 			'columns_per_row' => 4,
 			'show_post_title' => 'on',

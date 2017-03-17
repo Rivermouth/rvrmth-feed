@@ -1,0 +1,19 @@
+{
+  "name": "rivermouth/rvrmth-feed",
+  "description": "WordPress Plugin description",
+  "keywords": ["wordpress", "plugin", "roots"],
+  "homepage": "http://rivermouth.fi",
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "Karri Rasinmäki",
+      "email": "rasinmaki@rivermouth.fi",
+      "homepage": "http://rivermouth.fi"
+    }
+  ],
+  "type": "wordpress-plugin",
+  "require": {
+    "php": ">=5.3.2",
+    "composer/installers": "v1.0.6"
+  }
+}

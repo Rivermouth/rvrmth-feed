@@ -3,7 +3,7 @@
 Plugin Name: Post feed
 Plugin URI:  http://URI_Of_Page_Describing_Plugin_and_Updates
 Description: Post feed widget. Show posts in various different layouts and with various options
-Version:     0.3
+Version:     0.4
 Author:      Rivermouth Ltd
 Author URI:  http://rivermouth.fi
 License:     GPL2
@@ -16,9 +16,9 @@ include_once 'wp_dropdown_post_types.php';
 
 class Rvrmth_Widget_Feed extends WP_Widget {
 
-	private static $text_domain = 'rvrmth-feed';
+	public static $text_domain = 'rvrmth-feed';
 
-	private static $types = array(
+	public static $types = array(
 		'tiles' => 'Tiles',
 		'feed' => 'Feed'
 	);
@@ -37,13 +37,13 @@ class Rvrmth_Widget_Feed extends WP_Widget {
 		$this->register_ajax_js();
 	}
 
-	private static function get_default_instance()
+	public static function get_default_instance()
 	{
 		return array(
 			'title' => __( 'Title', self::$text_domain ),
 			'post_type' => 'post',
 			'category' => 0,
-			'type' => self::$types['tiles'],
+			'type' => 'tiles',
 			'max_results' => 4,
 			'columns_per_row' => 4,
 			'show_post_title' => 'on',
@@ -369,3 +369,13 @@ function load_rvrmth_widget_feed() {
 	register_widget('Rvrmth_Widget_Feed');
 }
 add_action('widgets_init', 'load_rvrmth_widget_feed');
+
+function rvrmth_widget_feed($instance_args)
+{
+	(new Rvrmth_Widget_Feed())->widget(array(
+		'before_widget' => '',
+		'title' => '',
+		'after_widget' => '',
+		'widget_id' => round(microtime(true) * 1000),
+	), array_merge(Rvrmth_Widget_Feed::get_default_instance(), $instance_args));
+}

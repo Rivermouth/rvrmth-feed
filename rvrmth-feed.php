@@ -373,7 +373,7 @@ add_action('widgets_init', 'load_rvrmth_widget_feed');
 
 function rvrmth_widget_feed($instance_args)
 {
-	(new Rvrmth_Widget_Feed())->widget(array(
+	return (new Rvrmth_Widget_Feed())->widget(array(
 		'before_widget' => '',
 		'title' => '',
 		'after_widget' => '',

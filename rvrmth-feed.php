@@ -193,7 +193,7 @@ class Rvrmth_Widget_Feed extends WP_Widget {
 		$do_we_have_posts = $this->fetch_items($fn_args);
 		$fetch_items_output = ob_get_clean();
 		if (!$do_we_have_posts) {
-			return;
+			return false;
 		}
 
 		echo $args['before_widget'];
@@ -229,6 +229,7 @@ class Rvrmth_Widget_Feed extends WP_Widget {
 		echo '</div>';
 
 		echo $args['after_widget'];
+		return true;
 	}
 
 	// Widget Backend

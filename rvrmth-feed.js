@@ -1,11 +1,18 @@
 jQuery(document).ready(function($) {
-	var feedInstanceWrappers = document.getElementsByClassName("rvrmth-feed");
 	
-	for (var i = 0, l = feedInstanceWrappers.length; i < l; ++i) {
-		new FeedInstace(feedInstanceWrappers[i]);
+	function initWrappers() {
+		console.log("masomdsa");
+		var feedInstanceWrappers = document.getElementsByClassName("rvrmth-feed");
+		for (var i = 0, l = feedInstanceWrappers.length; i < l; ++i) {
+			var wrapper = feedInstanceWrappers[i];
+			if (wrapper.getAttribute("data-rvrmth-feed-initialized") !== "1") {
+				new FeedInstace(wrapper);
+			}
+		}
 	}
 	
 	function FeedInstace(wrapper) {
+		wrapper.setAttribute("data-rvrmth-feed-initialized", "1");
 		var ajaxEnabled = _isAjaxEnabled();
 		var args = JSON.parse(wrapper.getAttribute("data-args"));
 		var postId = JSON.parse(wrapper.getAttribute("data-post-id"));
@@ -45,4 +52,10 @@ jQuery(document).ready(function($) {
 			shufflePostsEvery(args.shuffle_posts_every_ms);
 		}
 	}
+
+	initWrappers();
+
+	window.RvrmthFeed = {
+		initWrappers: initWrappers
+	};
 });

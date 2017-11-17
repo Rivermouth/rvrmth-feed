@@ -110,7 +110,7 @@ class Rvrmth_Widget_Feed extends WP_Widget {
 		$category = $args['category'];
 		$max_results = $args['max_results'];
 		$shuffle_posts_every_ms = $args['shuffle_posts_every_ms'];
-		$loop_query_params = '';
+		$loop_query_params = 'post_status=publish&';
 		if ($shuffle_posts_every_ms > 0) {
 			$loop_query_params .= 'orderby=rand&';
 		}

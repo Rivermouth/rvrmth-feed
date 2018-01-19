@@ -124,13 +124,13 @@ class Rvrmth_Widget_Feed extends WP_Widget {
 			foreach ( $taxonomies as $taxonomy ) {
 				$tax_query[] = array(
 					'taxonomy' => $taxonomy,
-					'field' => 'term_id',
+					'field' => 'term_taxonomy_id',
 					'terms' => $category,
 				);
 			}
 			$loop_query_params['tax_query'] = $tax_query;
 		}
-		echo "<!-- ";
+		echo "<!-- niin ";
 		var_dump($loop_query_params);
 		echo "-->";
 
@@ -290,7 +290,7 @@ class Rvrmth_Widget_Feed extends WP_Widget {
 					<label for="<?php echo $this->get_field_id( 'category' ); ?>">
 						<?php _e( 'Category:' ); ?>
 					</label>
-					<?php wp_dropdown_categories( array( 'show_option_none' =>'-- select -- save to update the list','name' => $this->get_field_name( 'category' ), 'taxonomy' => get_object_taxonomies( $post_type ), 'selected' => $category ) ); ?>
+					<?php wp_dropdown_categories( array( 'show_option_none' =>'-- all -- save to update the list','name' => $this->get_field_name( 'category' ), 'taxonomy' => get_object_taxonomies( $post_type ), 'selected' => $category ) ); ?>
 				</div>
 				<div>
 					<label for="<?php echo $this->get_field_id( 'type' ); ?>">

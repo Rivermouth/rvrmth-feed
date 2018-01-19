@@ -3,7 +3,7 @@
 Plugin Name: Post feed
 Plugin URI:  http://URI_Of_Page_Describing_Plugin_and_Updates
 Description: Post feed widget. Show posts in various different layouts and with various options
-Version:     0.5
+Version:     0.6
 Author:      Rivermouth Ltd
 Author URI:  http://rivermouth.fi
 License:     GPL2
@@ -269,7 +269,7 @@ class Rvrmth_Widget_Feed extends WP_Widget {
 					<label for="<?php echo $this->get_field_id( 'category' ); ?>">
 						<?php _e( 'Category:' ); ?>
 					</label>
-					<?php wp_dropdown_categories( array( 'show_option_none' =>' ','name' => $this->get_field_name( 'category' ), 'selected' => $category ) ); ?>
+					<?php wp_dropdown_categories( array( 'show_option_none' =>'-- select -- save to update the list','name' => $this->get_field_name( 'category' ), 'taxonomy' => get_object_taxonomies( $post_type ), 'selected' => $category ) ); ?>
 				</div>
 				<div>
 					<label for="<?php echo $this->get_field_id( 'type' ); ?>">

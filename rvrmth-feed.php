@@ -110,11 +110,29 @@ class Rvrmth_Widget_Feed extends WP_Widget {
 		$category = $args['category'];
 		$max_results = $args['max_results'];
 		$shuffle_posts_every_ms = $args['shuffle_posts_every_ms'];
-		$loop_query_params = 'post_status=publish&';
+		$loop_query_params = array(
+			'post_status' => 'publish'
+		);
 		if ($shuffle_posts_every_ms > 0) {
-			$loop_query_params .= 'orderby=rand&';
+			$loop_query_params['orderby'] = rand;
 		}
-		$loop_query_params .= 'post_type=' . $post_type . '&cat=' . $category . '&posts_per_page=' . $max_results;
+		$loop_query_params['post_type'] = $post_type;
+		$loop_query_params['posts_per_page'] = $max_results;
+		if ( intval( $category ) > 0 ) {
+			$tax_query = array();
+			$taxonomies = get_object_taxonomies( $post_type );
+			foreach ( $taxonomies as $taxonomy ) {
+				$tax_query[] = array(
+					'taxonomy' => $taxonomy,
+					'field' => 'term_id',
+					'terms' => $category,
+				);
+			}
+			$loop_query_params['tax_query'] = $tax_query;
+		}
+		echo "<!-- ";
+		var_dump($loop_query_params);
+		echo "-->";
 
 		if (function_exists('rvrmth_feed_args')) {
 			rvrmth_feed_args($args);
@@ -189,6 +207,9 @@ class Rvrmth_Widget_Feed extends WP_Widget {
 			'shuffle_posts_every_ms' => $shuffle_posts_every_ms
 		);
 
+		echo '<!-- ';
+		var_dump($fn_args);
+		echo '-->';
 		ob_start();
 		$do_we_have_posts = $this->fetch_items($fn_args);
 		$fetch_items_output = ob_get_clean();

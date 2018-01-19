@@ -103,8 +103,6 @@ class Rvrmth_Widget_Feed extends WP_Widget {
 
 	private function fetch_items($args=array())
 	{
-		$do_we_have_posts = false;
-
 		$type = $args['type'];
 		$post_type = $args['post_type'];
 		$category = $args['category'];
@@ -214,6 +212,9 @@ class Rvrmth_Widget_Feed extends WP_Widget {
 		$do_we_have_posts = $this->fetch_items($fn_args);
 		$fetch_items_output = ob_get_clean();
 		if (!$do_we_have_posts) {
+			echo '<!-- ';
+			echo $fetch_items_output;
+			echo '-->';
 			return false;
 		}
 

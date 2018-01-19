@@ -112,7 +112,7 @@ class Rvrmth_Widget_Feed extends WP_Widget {
 			'post_status' => 'publish'
 		);
 		if ($shuffle_posts_every_ms > 0) {
-			$loop_query_params['orderby'] = rand;
+			$loop_query_params['orderby'] = 'rand';
 		}
 		$loop_query_params['post_type'] = $post_type;
 		$loop_query_params['posts_per_page'] = $max_results;
@@ -122,7 +122,7 @@ class Rvrmth_Widget_Feed extends WP_Widget {
 			foreach ( $taxonomies as $taxonomy ) {
 				$tax_query[] = array(
 					'taxonomy' => $taxonomy,
-					'field' => 'term_taxonomy_id',
+					'field' => 'term_id',
 					'terms' => $category,
 				);
 			}
